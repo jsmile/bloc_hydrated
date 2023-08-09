@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'blocs/counter/counter_bloc.dart';
+import 'blocs/theme/theme_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,13 +13,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Hydrated BLoC',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CounterBloc>(
+          create: (_) => CounterBloc(),
+        ),
+        BlocProvider<ThemeBloc>(
+          create: (context) => ThemeBloc(),
+        ),
+      ],
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            title: 'Flutter Hydrated BLoC',
+            theme: state.appTheme == AppTheme.light
+                ? ThemeData.dark()
+                : ThemeData.light(),
+            // ThemeData(
+            //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            //   useMaterial3: true,
+            home: const MyHomePage(title: 'Flutter Hydrated BLoC Home Page'),
+          );
+        },
       ),
-      home: const MyHomePage(title: 'Flutter Hydrated BLoC Home Page'),
     );
   }
 }
@@ -29,27 +49,47 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor:
+            context.watch<ThemeBloc>().state.appTheme == AppTheme.light
+                ? Colors.black
+                : Colors.white24,
         title: Text(title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '0',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: Text(
+          '${context.watch<CounterBloc>().state.counter}',
+          style: const TextStyle(color: Colors.blue, fontSize: 52.0),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              context.read<ThemeBloc>().add(ThemeToggledEvent());
+            },
+            child: const Icon(Icons.brightness_6),
+          ),
+          const SizedBox(width: 5.0),
+          FloatingActionButton(
+            onPressed: () {
+              context.read<CounterBloc>().add(CounterIncreasedEvent());
+            },
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(width: 5.0),
+          FloatingActionButton(
+            onPressed: () {
+              context.read<CounterBloc>().add(CounterDecreasedEvent());
+            },
+            child: const Icon(Icons.remove),
+          ),
+          const SizedBox(width: 5.0),
+          FloatingActionButton(
+            onPressed: () {},
+            child: const Icon(Icons.delete_forever),
+          ),
+        ],
       ),
     );
   }
