@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'blocs/counter/counter_bloc.dart';
 import 'blocs/theme/theme_bloc.dart';
 
-main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: kIsWeb
@@ -95,7 +95,9 @@ class MyHomePage extends StatelessWidget {
           ),
           const SizedBox(width: 5.0),
           FloatingActionButton(
-            onPressed: () {},
+            onPressed: () {
+              HydratedBloc.storage.clear();
+            },
             child: const Icon(Icons.delete_forever),
           ),
         ],

@@ -20,4 +20,19 @@ class CounterState extends Equatable {
 
   @override
   String toString() => 'CounterState(counter: $counter)';
+
+  Map<String, dynamic> toMap() {
+    return {'counter': counter};
+  }
+
+  factory CounterState.fromMap(Map<String, dynamic> jsonMap) {
+    return CounterState(
+      counter: jsonMap['counter']?.toInt() ?? 0,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory CounterState.fromJson(String source) =>
+      CounterState.fromMap(json.decode(source));
 }
